@@ -1,3 +1,3 @@
 export class CrearMensajeDto {
-  mensaje: string;
+  mensaje!: string;
 }

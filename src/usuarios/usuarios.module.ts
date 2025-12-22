@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UsuariosController } from './usuarios.controller';
-import { UsuariosService } from './usuarios.services';
+import { UsuariosService } from './usuarios.service';
 import { SeguridadModule } from '../security/seguridad.module';
 
 @Module({

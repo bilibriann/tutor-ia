@@ -1,49 +1,69 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as Crypto from 'crypto';
-import { UsuariosService } from '../usuarios/usuarios.services';
-import { RegistrarUsuarioDTO } from './dto/registrar.usuario.dto';
+import { createHash } from 'crypto';
+import type { StringValue } from 'ms';
+import { UsuariosService } from '../usuarios/usuarios.service';
+import type { Usuario } from '../usuarios/entities/usuarios.entity';
+import type { JWTPayload } from './interface/jwt_payload.interface';
 import { GetAccessTokenDTO } from './dto/get.access_token.dto';
-import { JWTPayload } from './interface/jwt_payload.interface';
+import { RegistrarUsuarioDTO } from './dto/registrar.usuario.dto';
 
 @Injectable()
 export class AuthService {
-  private modo_hash: string = process.env.MODO_HASH ?? 'md5';
-
   constructor(
-    private readonly jwtService: JwtService,
     private readonly usuariosService: UsuariosService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  registrar(dto: RegistrarUsuarioDTO) {
-    const password_hash = this.generarPasswordHash(dto.password);
-    return this.usuariosService.insertarUsuario(dto, password_hash);
+  validarCredenciales(username: string, password: string): Usuario {
+    const usuario = this.usuariosService.buscarPorUsername(username);
+
+    if (!usuario || usuario.active === false) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const passwordHash = this.generarPasswordHash(password);
+
+    if (passwordHash !== usuario.passwordHash) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    return usuario;
   }
 
-  async login(usuario: { id: string; username: string; rol: string }) {
+  async login(usuario: Usuario): Promise<GetAccessTokenDTO> {
     const payload: JWTPayload = {
       sub: usuario.id,
       user: usuario.username,
       rol: usuario.rol,
     };
 
-    const respuesta = new GetAccessTokenDTO();
-    respuesta.access_token = await this.jwtService.signAsync(payload);
-    return respuesta;
+    const secret = process.env.JWT_SECRET ?? 'secret_dev';
+    const expiresIn = this.parseExpiresIn(process.env.JWT_EXPIRES_IN);
+
+    const access_token = await this.jwtService.signAsync(payload, {
+      secret,
+      ...(expiresIn ? { expiresIn } : {}),
+    });
+
+    return { access_token };
   }
 
-  validarCredenciales(username: string, password: string) {
-    const usuario = this.usuariosService.buscarPorUsername(username);
-    if (!usuario) throw new UnauthorizedException('Credenciales no válidas');
-
-    const password_hash = this.generarPasswordHash(password);
-    if (password_hash !== usuario.password_hash)
-      throw new UnauthorizedException('Credenciales no válidas');
-
-    return usuario;
+  register(dto: RegistrarUsuarioDTO) {
+    const passwordHash = this.generarPasswordHash(dto.password);
+    return this.usuariosService.insertarUsuario(dto, passwordHash);
   }
 
-  generarPasswordHash(password: string) {
-    return Crypto.createHash(this.modo_hash).update(password).digest('hex');
+  private generarPasswordHash(password: string): string {
+    return createHash('md5').update(password).digest('hex');
+  }
+
+  private parseExpiresIn(value?: string): number | StringValue | undefined {
+    if (!value) return undefined;
+
+    const asNumber = Number(value);
+    if (!Number.isNaN(asNumber)) return asNumber;
+
+    return value as StringValue;
   }
 }

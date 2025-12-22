@@ -5,10 +5,10 @@ export class RegistrarUsuarioDTO {
   @ApiProperty({ example: 'brian' })
   @IsString()
   @IsNotEmpty()
-  username: string;
+  username!: string;
 
   @ApiProperty({ example: 'brian1234' })
   @IsString()
   @MinLength(6)
-  password: string;
+  password!: string;
 }

@@ -1,4 +1,4 @@
 export class RespuestaIaDto {
-  respuesta: string;
-  tokens: number;
+  respuesta!: string;
+  tokens!: number;
 }

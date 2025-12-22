@@ -3,9 +3,9 @@ import { IsString, IsNotEmpty } from 'class-validator';
 export class SolicitudIaDto {
   @IsString()
   @IsNotEmpty()
-  mensaje: string;
+  mensaje!: string;
 
   @IsString()
   @IsNotEmpty()
-  texto: string;
+  texto!: string;
 }

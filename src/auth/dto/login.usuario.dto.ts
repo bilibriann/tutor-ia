@@ -5,10 +5,10 @@ export class LoginUsuarioDTO {
   @ApiProperty({ example: 'brian' })
   @IsString()
   @IsNotEmpty()
-  username: string;
+  username!: string;
 
   @ApiProperty({ example: 'brian1234' })
   @IsString()
   @IsNotEmpty()
-  password: string;
+  password!: string;
 }
