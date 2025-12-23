@@ -6,7 +6,7 @@ import {
 import { Usuario } from './entities/usuarios.entity';
 import { RegistrarUsuarioDTO } from '../auth/dto/registrar.usuario.dto';
 import { UsuariosMapper } from './mapper/usuario.mapper';
-import { Roles } from 'src/enum/rol.enum';
+import { Roles } from '../enum/rol.enum';
 
 @Injectable()
 export class UsuariosService {

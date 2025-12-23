@@ -4,7 +4,7 @@ import { UsuariosService } from './usuarios.service';
 import { AutenticacionGuard } from '../security/guard/autenticacion.guard';
 import { AutorizacionGuard } from '../security/guard/autorizacion.guard';
 import { RolesPermitidos } from '../security/decorator/roles.decorator';
-import { Roles } from 'src/enum/rol.enum';
+import { Roles } from '../enum/rol.enum';
 
 @ApiTags('Usuarios')
 @Controller('usuarios')
